@@ -7,4 +7,5 @@ module p2p.chatting.app {
     exports com.example;
     exports com.example.fxml;
     opens com.example.fxml to javafx.fxml;
+    exports com.example.net;
 }

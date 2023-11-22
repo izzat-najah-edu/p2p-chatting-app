@@ -135,14 +135,6 @@ public class ClientChatController
         }
     }
 
-    private void addToMessagesList(String message, Color color) {
-        Platform.runLater(() -> {
-            var label = new Label(message);
-            Styler.setTextColorBlue(label);
-            messagesList.getItems().add(label);
-        });
-    }
-
     @Override
     public void onMessageReceived(Message message) {
         Platform.runLater(() -> {

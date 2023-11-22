@@ -25,21 +25,6 @@ public interface NetworkUtility {
     }
 
     /**
-     * Retrieves the remote IP address based on the given hostname.
-     *
-     * @param hostname the hostname of the remote machine
-     * @return the remote IP address as a String, or null if unable to retrieve the IP address
-     */
-    static String getRemoteIP(String hostname) {
-        try {
-            return InetAddress.getByName(hostname).getHostAddress();
-        } catch (UnknownHostException e) {
-            Alerter.showError(e.getMessage());
-            return null;
-        }
-    }
-
-    /**
      * Checks whether a port is available for use.
      *
      * @param port the port number to check
@@ -63,8 +48,8 @@ public interface NetworkUtility {
      */
     static boolean isValidIP(String ip) {
         if (ip == null || ip.isEmpty()) return false;
-        var IP_PATTERN = "^(([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.){3}([01]?\\d\\d?|2[0-4]\\d|25[0-5])$";
-        return ip.matches(IP_PATTERN);
+        var ipRegex = "^(([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.){3}([01]?\\d\\d?|2[0-4]\\d|25[0-5])$";
+        return ip.matches(ipRegex);
     }
 
     /**

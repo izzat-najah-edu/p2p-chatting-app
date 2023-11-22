@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane fx:id="clientChatRoot" prefHeight="538.0" prefWidth="847.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.fxml.ClientChatController">
+   <children>
+      <Label layoutX="38.0" layoutY="498.0" text="Status:" />
+      <TextField fx:id="statusTextField" layoutX="84.0" layoutY="494.0" prefHeight="25.0" prefWidth="553.0" />
+      <TextArea fx:id="messageTextArea" layoutX="30.0" layoutY="399.0" prefHeight="83.0" prefWidth="386.0" promptText="Enter your message here" />
+      <ListView fx:id="messagesList" layoutX="30.0" layoutY="69.0" prefHeight="318.0" prefWidth="386.0" />
+      <Button fx:id="logoutButton" layoutX="360.0" layoutY="31.0" mnemonicParsing="false" text="Logout" />
+      <Button fx:id="loginButton" layoutX="305.0" layoutY="31.0" mnemonicParsing="false" text="Login" />
+      <Label layoutX="28.0" layoutY="35.0" text="Username:" />
+      <TextField fx:id="usernameTextField" layoutX="93.0" layoutY="31.0" prefHeight="25.0" prefWidth="203.0" />
+      <Label layoutX="431.0" layoutY="48.0" prefHeight="17.0" prefWidth="85.0" text="TCP Server IP:" textAlignment="RIGHT" />
+      <TextField fx:id="serverIPTextField" layoutX="528.0" layoutY="44.0" prefHeight="25.0" prefWidth="104.0" promptText="255.255.255.255" />
+      <Label layoutX="433.0" layoutY="83.0" text="TCP Server Port:" textAlignment="RIGHT" />
+      <TextField fx:id="serverPortTextField" layoutX="528.0" layoutY="79.0" prefHeight="25.0" prefWidth="104.0" promptText="9999" />
+      <Label layoutX="434.0" layoutY="130.0" text="Available Interfaces:" />
+      <ComboBox layoutX="432.0" layoutY="155.0" prefHeight="25.0" prefWidth="203.0" />
+      <Label layoutX="433.0" layoutY="212.0" prefHeight="17.0" prefWidth="85.0" text="Local IP:" textAlignment="RIGHT" />
+      <TextField fx:id="localIPTextField" layoutX="528.0" layoutY="208.0" prefHeight="25.0" prefWidth="104.0" promptText="255.255.255.255" />
+      <Label contentDisplay="RIGHT" layoutX="433.0" layoutY="247.0" prefHeight="17.0" prefWidth="85.0" text="Local Port:" textAlignment="RIGHT" />
+      <TextField fx:id="localPortTextField" layoutX="528.0" layoutY="243.0" prefHeight="25.0" prefWidth="104.0" promptText="9999" />
+      <Label layoutX="433.0" layoutY="304.0" text="Remote IP:" />
+      <TextField fx:id="remoteIPTextField" layoutX="528.0" layoutY="300.0" prefHeight="25.0" prefWidth="104.0" promptText="255.255.255.255" />
+      <Label layoutX="433.0" layoutY="339.0" text="Remote Port:" />
+      <TextField fx:id="remotePortTextField" layoutX="528.0" layoutY="335.0" prefHeight="25.0" prefWidth="104.0" promptText="9999" />
+      <Button fx:id="sendButton" layoutX="453.0" layoutY="441.0" mnemonicParsing="false" prefHeight="32.0" prefWidth="162.0" text="Send" />
+      <Button fx:id="testButton" layoutX="453.0" layoutY="399.0" mnemonicParsing="false" prefHeight="32.0" prefWidth="162.0" text="Test" />
+      <Label layoutX="655.0" layoutY="36.0" prefHeight="17.0" prefWidth="85.0" text="Online Users:" textAlignment="RIGHT" />
+      <ListView fx:id="onlineUsersList" layoutX="655.0" layoutY="62.0" prefHeight="455.0" prefWidth="173.0" />
+   </children>
+</AnchorPane>

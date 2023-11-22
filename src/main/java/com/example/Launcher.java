@@ -11,10 +11,11 @@ public class Launcher extends Application {
 
     @Override
     public void start(Stage stage) throws IOException {
-        var loader = new FXMLLoader(Launcher.class.getResource("fxml/main.fxml"));
+        var loader = new FXMLLoader(Launcher.class.getResource("fxml/client_chat.fxml"));
         var scene = new Scene(loader.load());
-        stage.setTitle("Client App");
+        stage.setTitle("Client Chat");
         stage.setScene(scene);
+        stage.setResizable(false);
         stage.show();
     }
 

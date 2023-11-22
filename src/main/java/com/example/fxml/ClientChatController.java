@@ -2,10 +2,7 @@ package com.example.fxml;
 
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Button;
-import javafx.scene.control.ListView;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
 
 import java.net.URL;
@@ -19,6 +16,9 @@ public class ClientChatController
 
     @FXML
     private TextArea messageTextArea;
+
+    @FXML
+    private ComboBox<?> availableInterfacesComboBox;
 
     @FXML
     private ListView<?>
@@ -42,7 +42,6 @@ public class ClientChatController
             logoutButton,
             sendButton,
             testButton;
-
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {

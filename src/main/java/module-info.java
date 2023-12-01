@@ -3,6 +3,8 @@ module p2p.chatting.app {
     requires javafx.controls;
     requires javafx.graphics;
     requires javafx.fxml;
+    requires java.desktop;
+    requires java.logging;
 
     exports com.example;
     exports com.example.fxml;

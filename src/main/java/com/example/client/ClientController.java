@@ -5,9 +5,7 @@ import com.example.Authenticator;
 import com.example.Message;
 
 import javax.swing.*;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
@@ -19,15 +17,22 @@ public class ClientController {
     private DatagramSocket socket;
     private String username;
 
+    private final DefaultListModel<String> dlm;
     private final byte[] rBuffer = new byte[50];
     private final DatagramPacket receivePacket;
 
     private boolean loggedIn = false;
+    private boolean established = false;
 
-    private final DefaultListModel<String> dlm;
-    private java.io.DataInputStream dataFromServer;
+    private DataInputStream dataFromServer;
     private DataOutputStream dataToServer;
     private Socket serverSocket;
+
+    private String remoteIp;
+    private int remotePort;
+    private BufferedReader inFromUser;
+    private Socket clientSocket;
+    private DataOutputStream outToUser;
 
     private final ArrayList<ReceiveListener> listeners = new ArrayList<>();
 
@@ -95,12 +100,28 @@ public class ClientController {
         }
 
         loggedIn = false;
+        established = false;
         sendToServer("logout");
         Alerter.showMessage("You logged out successfully");
     }
 
+    public void establish(String remoteIp, int remotePort) {
+        if (established) {
+            Alerter.showMessage("A connection is already established.");
+            return;
+        }
+        this.remoteIp = remoteIp;
+        this.remotePort = remotePort;
+        new Thread(connectionRunnable).start();
+    }
+
     public void send(String message, int remotePort, String remoteIp) {
         try {
+            if (established) { // TCP
+                outToUser.writeUTF(message);
+                return;
+            }
+            // UDP
             byte[] sBuffer = message.getBytes();
             InetAddress remoteIpAddress = InetAddress.getByName(remoteIp);
             DatagramPacket sendPacket = new DatagramPacket(sBuffer, sBuffer.length, remoteIpAddress, remotePort);
@@ -161,6 +182,54 @@ public class ClientController {
                     listeners.forEach(i -> i.onReceive(new Message(receivePacket.getAddress(), receivePacket.getPort(), msg)));
                 } catch (IOException ignored) {
                 }
+            }
+        }
+    };
+
+    private final Runnable receiveMessagesFromUser = new Runnable() {
+        @Override
+        public void run() {
+            while (established) {
+                try {
+                    String msg = inFromUser.readLine();
+                    var address = InetAddress.getByName(remoteIp);
+                    listeners.forEach(i -> i.onReceive(new Message(address, remotePort, msg)));
+                } catch (IOException ignored) {
+                }
+            }
+        }
+    };
+
+    private final Runnable connectionRunnable = new Runnable() {
+        @Override
+        public void run() {
+            long startTime = System.currentTimeMillis();
+            long elapsedTime = 0L;
+
+            while (elapsedTime < 1000) {
+                try {
+                    clientSocket = new Socket(remoteIp, remotePort);
+                    outToUser = new DataOutputStream(clientSocket.getOutputStream());
+                    inFromUser = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+                    Alerter.showMessage("Connection Established!");
+                    established = true;
+                    break;
+                } catch (IOException e) {
+                    Alerter.showMessage("Trying to establish connection...");
+                    try {
+                        Thread.sleep(500);
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                        break;
+                    }
+                }
+
+                elapsedTime = System.currentTimeMillis() - startTime;
+            }
+
+            if (elapsedTime >= 1000) {
+                // Alerter.showError("Could not establish connection in 5 seconds!");
+                established = false;
             }
         }
     };

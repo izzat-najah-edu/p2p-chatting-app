@@ -96,6 +96,52 @@ public class ClientServer extends JFrame
     private void Remot_PortActionPerformed(java.awt.event.ActionEvent evt) {
     }
 
+    private void deleteActionPerformed(java.awt.event.ActionEvent evt) {
+        int start = textPaneArea.getSelectionStart();
+        int end = textPaneArea.getSelectionEnd();
+
+        if (start != end) { // something is selected
+            try {
+                var doc = textPaneArea.getDocument();
+                String text = doc.getText(0, doc.getLength());
+
+                int startLine = start - text.substring(0, start).lastIndexOf("\n") - 1;
+                int endLine = end + text.substring(end).indexOf("\n");
+
+                if (endLine < end) {
+                    endLine = end;
+                }
+
+                if (startLine < 0) {
+                    startLine = 0;
+                }
+
+                doc.remove(startLine, endLine - startLine);
+
+            } catch (BadLocationException e) {
+                Logger.getLogger(ClientServer.class.getName()).log(Level.SEVERE, null, e);
+            }
+        }
+    }
+
+    private void deleteallActionPerformed(java.awt.event.ActionEvent evt) {
+        textPaneArea.setText("");
+    }
+
+    private void establishConnectionActionPerformed(java.awt.event.ActionEvent evt) {
+        if (!controller.isLoggedIn()) {
+            Alerter.showError("You can't connect, please Login first");
+        } else if (remoteIpField.getText().isEmpty() || remotePortField.getText().isEmpty()) {
+            Alerter.showError("You should select a user from the online user list");
+        } else try {
+            var remoteIp = remoteIpField.getText();
+            int remotePort = Integer.parseInt(remotePortField.getText());
+            controller.establish(remoteIp, remotePort);
+        } catch (NumberFormatException e) {
+            Alerter.showError("Bad port number");
+        }
+    }
+
     private void sendActionPerformed(java.awt.event.ActionEvent evt) {
         try {
             if (!controller.isLoggedIn()) {
@@ -232,7 +278,9 @@ public class ClientServer extends JFrame
 
         usernameField = new javax.swing.JTextField();
         passwordField = new javax.swing.JTextField();
-
+        JButton jButton3 = new JButton();
+        JButton delete = new JButton();
+        JButton deleteall = new JButton();
         javax.swing.JButton login = new javax.swing.JButton();
         javax.swing.JButton jButton2 = new javax.swing.JButton();
         javax.swing.JScrollPane jScrollPane2 = new javax.swing.JScrollPane();
@@ -404,6 +452,26 @@ public class ClientServer extends JFrame
         send.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
         send.addActionListener(this::sendActionPerformed);
 
+        jButton3.setBackground(new java.awt.Color(179, 209, 255));
+        jButton3.setFont(new java.awt.Font("Georgia", 0, 14)); // NOI18N
+        jButton3.setText("Establish Connection");
+        jButton3.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        jButton3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                establishConnectionActionPerformed(evt);
+            }
+        });
+        delete.setBackground(new java.awt.Color(179, 209, 255));
+        delete.setFont(new java.awt.Font("Georgia", 0, 14)); // NOI18N
+        delete.setText("Delete");
+        delete.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        delete.addActionListener(this::deleteActionPerformed);
+        deleteall.setBackground(new java.awt.Color(179, 209, 255));
+        deleteall.setFont(new java.awt.Font("Georgia", 0, 14)); // NOI18N
+        deleteall.setText("Delete all");
+        deleteall.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        deleteall.addActionListener(this::deleteallActionPerformed);
+
         sendToAll.setBackground(new java.awt.Color(179, 209, 255));
         sendToAll.setFont(new java.awt.Font("Georgia", 0, 14)); // NOI18N
         sendToAll.setText("Send to All");
@@ -465,11 +533,14 @@ public class ClientServer extends JFrame
                                                                 .addGap(30, 30, 30)
                                                                 .addComponent(send, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
                                                                 .addGap(18, 18, 18)
+                                                                .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                                .addGap(10, 20, 30)
+                                                                .addComponent(delete, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                                .addGap(10, 20, 30)
+                                                                .addComponent(deleteall, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                                .addGap(18, 18, 18)
                                                                 .addComponent(sendToAll, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE))
-
                                                         .addGroup(jPanel1Layout.createSequentialGroup()
-
-
                                                                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                                                         .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, 303, javax.swing.GroupLayout.PREFERRED_SIZE)
                                                                         .addGroup(jPanel1Layout.createSequentialGroup()
@@ -506,8 +577,11 @@ public class ClientServer extends JFrame
                                                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                                                         .addGroup(jPanel1Layout.createSequentialGroup()
                                                                 .addGap(0, 0, Short.MAX_VALUE)
-                                                                .addComponent(send, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                                                .addComponent(sendToAll, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                                                .addComponent(send, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                                .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                                .addComponent(delete, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                                .addComponent(deleteall, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                                .addComponent(sendToAll, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE))
                                                         .addGap(18, 18, 18)
                                                         .addGroup(jPanel1Layout.createSequentialGroup()
                                                                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)

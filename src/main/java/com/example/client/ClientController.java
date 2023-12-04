@@ -1,7 +1,8 @@
-package com.example.chatting2.client;
+package com.example.client;
 
 import com.example.Alerter;
-import com.example.net.Message;
+import com.example.Authenticator;
+import com.example.Message;
 
 import javax.swing.*;
 import java.io.DataInputStream;
@@ -17,16 +18,10 @@ public class ClientController {
 
     private DatagramSocket socket;
     private String username;
-    private String password;
-    private String localIp;
-    private int localPort;
-    private String remoteIp;
-    private int remotePort;
 
     private final byte[] rBuffer = new byte[50];
     private final DatagramPacket receivePacket;
 
-    private boolean connected = false;
     private boolean loggedIn = false;
 
     private final DefaultListModel<String> dlm;
@@ -38,21 +33,12 @@ public class ClientController {
 
     public ClientController() {
         username = "";
-        localIp = "";
-        localPort = 0;
-        remoteIp = "";
-        remotePort = 0;
         receivePacket = new DatagramPacket(rBuffer, rBuffer.length);
-        password = "";
         dlm = new DefaultListModel<>();
     }
 
     public boolean isLoggedIn() {
         return loggedIn;
-    }
-
-    public boolean isConnected() {
-        return connected;
     }
 
     public String getUsername() {
@@ -69,14 +55,7 @@ public class ClientController {
 
     public void login(String username, String password, String serverIp, int serverPort, String localIp, int localPort) {
         this.username = username;
-        this.password = password;
-        this.localPort = localPort;
-        this.localIp = localIp;
-        if (username.equalsIgnoreCase("ali") && password.equals("1234")
-                || username.equalsIgnoreCase("saly") && password.equals("A20B")
-                || username.equalsIgnoreCase("aws") && password.equals("ABcd")
-                || username.equalsIgnoreCase("adam") && password.equals("1Cb2")) {
-            connected = true;
+        if (Authenticator.isValid(username, password)) {
             try {
                 socket = new DatagramSocket(localPort);
             } catch (SocketException ex) {
@@ -123,8 +102,6 @@ public class ClientController {
     public void send(String message, int remotePort, String remoteIp) {
         try {
             byte[] sBuffer = message.getBytes();
-            this.remoteIp = remoteIp;
-            this.remotePort = remotePort;
             InetAddress remoteIpAddress = InetAddress.getByName(remoteIp);
             DatagramPacket sendPacket = new DatagramPacket(sBuffer, sBuffer.length, remoteIpAddress, remotePort);
             socket.send(sendPacket);

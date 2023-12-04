@@ -1,6 +1,6 @@
-package com.example.chatting2.client;
+package com.example.client;
 
-import com.example.net.Message;
+import com.example.Message;
 
 @FunctionalInterface
 public interface ReceiveListener {

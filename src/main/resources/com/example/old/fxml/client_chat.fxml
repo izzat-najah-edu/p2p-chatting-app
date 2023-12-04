@@ -8,7 +8,7 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<AnchorPane fx:id="clientChatRoot" prefHeight="523.0" prefWidth="908.0" stylesheets="@../styles/globals.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.fxml.ClientChatController">
+<AnchorPane fx:id="clientChatRoot" prefHeight="523.0" prefWidth="908.0" stylesheets="@../styles/globals.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.old.fxml.ClientChatController">
     <Label layoutX="34.0" layoutY="481.0" text="Status:" />
     <TextField fx:id="statusTextField" layoutX="80.0" layoutY="477.0" prefHeight="25.0" prefWidth="553.0" />
     <TextArea fx:id="messageTextArea" layoutX="26.0" layoutY="382.0" prefHeight="83.0" prefWidth="386.0" promptText="Enter your message here" />

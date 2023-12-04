@@ -1,4 +1,4 @@
-package com.example.chatting2.server;
+package com.example.server;
 
 import com.example.Alerter;
 

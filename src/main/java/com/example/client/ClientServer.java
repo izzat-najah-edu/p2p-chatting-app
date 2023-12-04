@@ -1,7 +1,7 @@
-package com.example.chatting2.client;
+package com.example.client;
 
 import com.example.Alerter;
-import com.example.net.Message;
+import com.example.Message;
 
 import javax.swing.*;
 import javax.swing.text.BadLocationException;
@@ -101,7 +101,7 @@ public class ClientServer extends JFrame
 
     private void sendActionPerformed(java.awt.event.ActionEvent evt) {
         try {
-            if (!controller.isConnected()) {
+            if (!controller.isLoggedIn()) {
                 Alerter.showError("You can't send, please Login first");
             } else if (remoteIpField.getText().isEmpty() || remotePortField.getText().isEmpty()) {
                 Alerter.showError("You should select a user from the online user list");
@@ -124,7 +124,7 @@ public class ClientServer extends JFrame
 
     private void sendToAllActionPerformed(java.awt.event.ActionEvent evt) {
         try {
-            if (!controller.isConnected()) {
+            if (!controller.isLoggedIn()) {
                 Alerter.showError("You can't send, please Login first");
             } else if (inArea.getText().isEmpty() || inArea.getText().equals("enter text here")) {
                 Alerter.showError("You can't send empty message");

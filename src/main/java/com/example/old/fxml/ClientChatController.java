@@ -1,17 +1,16 @@
-package com.example.fxml;
+package com.example.old.fxml;
 
 import com.example.Alerter;
-import com.example.Styler;
-import com.example.net.ChatListener;
-import com.example.net.Message;
-import com.example.net.NetworkUtility;
-import com.example.net.UDPChatController;
+import com.example.old.Styler;
+import com.example.old.net.ChatListener;
+import com.example.Message;
+import com.example.old.net.NetworkUtility;
+import com.example.old.net.UDPChatController;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.paint.Color;
 
 import java.io.IOException;
 import java.net.URL;

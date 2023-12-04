@@ -1,8 +1,8 @@
-package com.example.chatting2;
+package com.example;
 
-import com.example.chatting2.client.ClientController;
-import com.example.chatting2.client.ClientServer;
-import com.example.chatting2.server.Server;
+import com.example.client.ClientController;
+import com.example.client.ClientServer;
+import com.example.server.Server;
 
 import javax.swing.JFrame;
 

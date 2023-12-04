@@ -7,7 +7,8 @@ module p2p.chatting.app {
     requires java.logging;
 
     exports com.example;
-    exports com.example.fxml;
-    opens com.example.fxml to javafx.fxml;
-    exports com.example.net;
+    exports com.example.old.fxml;
+    opens com.example.old.fxml to javafx.fxml;
+    exports com.example.old.net;
+    exports com.example.old;
 }

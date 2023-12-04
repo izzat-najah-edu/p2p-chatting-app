@@ -1,4 +1,6 @@
-package com.example.net;
+package com.example.old.net;
+
+import com.example.Message;
 
 /**
  * This interface represents a listener for chat messages.

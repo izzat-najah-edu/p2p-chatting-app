@@ -1,15 +1,11 @@
 package com.example.chatting2;
 
-public class ReceiveThread implements Runnable {
-    Client client;
-
-    ReceiveThread(Client client) {
-        this.client = client;
-    }
+public record ReceiveThread(
+        Client client
+) implements Runnable {
 
     public void start() {
-        Thread thread = new Thread(this);
-        thread.start();
+        new Thread(this).start();
     }
 
     @Override

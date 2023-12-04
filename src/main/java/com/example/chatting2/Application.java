@@ -1,5 +1,9 @@
 package com.example.chatting2;
 
+import com.example.chatting2.client.ClientController;
+import com.example.chatting2.client.ClientServer;
+import com.example.chatting2.server.Server;
+
 import javax.swing.JFrame;
 
 public class Application {
@@ -13,11 +17,6 @@ public class Application {
         clientServer2.setVisible(true);
         clientServer2.setSize(1300, 575);
         clientServer2.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-        ClientServer clientServer3 = new ClientServer(new ClientController());
-        clientServer3.setVisible(true);
-        clientServer3.setSize(1300, 575);
-        clientServer3.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         Server Server = new Server();
         Server.setVisible(true);

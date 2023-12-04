@@ -1,12 +1,14 @@
-package com.example.chatting2;
+package com.example.chatting2.client;
 
 import com.example.Alerter;
+import com.example.net.Message;
 
 import javax.swing.*;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.*;
+import java.util.ArrayList;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -20,24 +22,19 @@ public class ClientController {
     private int localPort;
     private String remoteIp;
     private int remotePort;
-    private InetAddress remoteIpAddress;
-    private byte[] sBuffer;
-    private DatagramPacket sendPacket;
-    private byte[] rBuffer;
-    private DatagramPacket receivePacket;
-    private boolean conn = false;
+
+    private final byte[] rBuffer = new byte[50];
+    private final DatagramPacket receivePacket;
+
+    private boolean connected = false;
     private boolean loggedIn = false;
 
-    private DefaultListModel<String> dlm;
+    private final DefaultListModel<String> dlm;
     private java.io.DataInputStream dataFromServer;
-    private DataInputStream DataInputStream;
     private DataOutputStream dataToServer;
     private Socket serverSocket;
-    private Read r;
-    private ReceiveThread channel;
-    private boolean contReceiving = false;
-    private boolean receiveFromServer = false;
-    private TriRunnable<String, Integer, String> onReceive;
+
+    private final ArrayList<ReceiveListener> listeners = new ArrayList<>();
 
     public ClientController() {
         username = "";
@@ -45,7 +42,6 @@ public class ClientController {
         localPort = 0;
         remoteIp = "";
         remotePort = 0;
-        rBuffer = new byte[50];
         receivePacket = new DatagramPacket(rBuffer, rBuffer.length);
         password = "";
         dlm = new DefaultListModel<>();
@@ -56,7 +52,7 @@ public class ClientController {
     }
 
     public boolean isConnected() {
-        return conn;
+        return connected;
     }
 
     public String getUsername() {
@@ -67,15 +63,20 @@ public class ClientController {
         return dlm;
     }
 
-    public void login(String username, String password, String serverIp, int serverPort, String localIp, int localPort, TriRunnable<String, Integer, String> onReceive) {
+    public void subscribe(ReceiveListener listener) {
+        listeners.add(listener);
+    }
+
+    public void login(String username, String password, String serverIp, int serverPort, String localIp, int localPort) {
         this.username = username;
         this.password = password;
-        this.onReceive = onReceive;
+        this.localPort = localPort;
+        this.localIp = localIp;
         if (username.equalsIgnoreCase("ali") && password.equals("1234")
                 || username.equalsIgnoreCase("saly") && password.equals("A20B")
                 || username.equalsIgnoreCase("aws") && password.equals("ABcd")
                 || username.equalsIgnoreCase("adam") && password.equals("1Cb2")) {
-            conn = true;
+            connected = true;
             try {
                 socket = new DatagramSocket(localPort);
             } catch (SocketException ex) {
@@ -88,23 +89,18 @@ public class ClientController {
                 dataToServer.writeUTF(username);
 
                 String s;
-                DataInputStream = new DataInputStream(serverSocket.getInputStream());
-                s = DataInputStream.readUTF();
+                java.io.DataInputStream dataInputStream = new DataInputStream(serverSocket.getInputStream());
+                s = dataInputStream.readUTF();
                 if (s.equals("founded")) {
-                    Alerter.showError("You are already login!");
+                    Alerter.showError("Username is already logged in!");
                     return;
-                } else if (s.equals("accept")) {
-                    dlm.clear();
-                    r = new Read(username);
-                    r.start();
                 }
 
-                receiveFromServer = true;
-                channel = new ReceiveThread(this);
-                channel.start();
-                contReceiving = true;
-                Alerter.showMessage("You logged in successfully");
                 loggedIn = true;
+                new Thread(readFromServerTask).start();
+                new Thread(receiveMessagesTask).start();
+                Alerter.showMessage("You logged in successfully");
+
             } catch (IOException ex) {
                 Alerter.showError("The local port is used");
             }
@@ -120,20 +116,17 @@ public class ClientController {
         }
 
         loggedIn = false;
-        contReceiving = false;
-        receiveFromServer = false;
-
         sendToServer("logout");
         Alerter.showMessage("You logged out successfully");
     }
 
     public void send(String message, int remotePort, String remoteIp) {
         try {
-            this.sBuffer = message.getBytes();
+            byte[] sBuffer = message.getBytes();
             this.remoteIp = remoteIp;
             this.remotePort = remotePort;
-            this.remoteIpAddress = InetAddress.getByName(remoteIp);
-            sendPacket = new DatagramPacket(sBuffer, sBuffer.length, remoteIpAddress, remotePort);
+            InetAddress remoteIpAddress = InetAddress.getByName(remoteIp);
+            DatagramPacket sendPacket = new DatagramPacket(sBuffer, sBuffer.length, remoteIpAddress, remotePort);
             socket.send(sendPacket);
         } catch (IOException e) {
             Alerter.showError("Could not send message!");
@@ -152,17 +145,10 @@ public class ClientController {
         }
     }
 
-    class Read extends Thread {
-
-        String userName;
-
-        public Read(String userName) {
-            this.userName = userName;
-        }
-
+    private final Runnable readFromServerTask = new Runnable() {
         @Override
         public void run() {
-            while (receiveFromServer) {
+            while (loggedIn) {
                 try {
                     String inputData = dataFromServer.readUTF();
                     if (inputData.equals("logout")) {
@@ -175,7 +161,7 @@ public class ClientController {
                         while (st.hasMoreTokens()) {
                             String line = st.nextToken();
                             String[] tokens = line.split(",");
-                            if (!tokens[0].equals(userName)) {
+                            if (!tokens[0].equals(username)) {
                                 String element = tokens[0] + "," + tokens[2] + "," + tokens[1];
                                 dlm.addElement(element);
                             }
@@ -185,17 +171,20 @@ public class ClientController {
                 }
             }
         }
-    }
+    };
 
-    void receive() {
-        try {
-            if (contReceiving) {
-                socket.receive(receivePacket);
-                String msg = new String(rBuffer, 0, receivePacket.getLength());
-                if (msg.equals("logout")) return;
-                onReceive.apply(msg, receivePacket.getPort(), receivePacket.getAddress().getHostAddress());
+    private final Runnable receiveMessagesTask = new Runnable() {
+        @Override
+        public void run() {
+            while (loggedIn) {
+                try {
+                    socket.receive(receivePacket);
+                    String msg = new String(rBuffer, 0, receivePacket.getLength());
+                    if (msg.equals("logout")) return;
+                    listeners.forEach(i -> i.onReceive(new Message(receivePacket.getAddress(), receivePacket.getPort(), msg)));
+                } catch (IOException ignored) {
+                }
             }
-        } catch (IOException ignored) {
         }
-    }
+    };
 }

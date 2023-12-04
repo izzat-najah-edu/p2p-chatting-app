@@ -1,6 +1,7 @@
-package com.example.chatting2;
+package com.example.chatting2.client;
 
 import com.example.Alerter;
+import com.example.net.Message;
 
 import javax.swing.*;
 import javax.swing.text.BadLocationException;
@@ -19,7 +20,8 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class ClientServer extends JFrame {
+public class ClientServer extends JFrame
+        implements ReceiveListener {
 
     private javax.swing.JTextField localIpField;
     private javax.swing.JTextField localPortField;
@@ -39,6 +41,7 @@ public class ClientServer extends JFrame {
 
     public ClientServer(ClientController controller) {
         this.controller = controller;
+        controller.subscribe(this);
         initComponents();
         textPaneArea.setEditable(false);
         remoteIpField.setEditable(false);
@@ -68,8 +71,7 @@ public class ClientServer extends JFrame {
                     serverIpField.getText().trim(),
                     Integer.parseInt(serverPortField.getText().trim()),
                     localIpField.getText().trim(),
-                    Integer.parseInt(localPortField.getText().trim()),
-                    this::onReceive
+                    Integer.parseInt(localPortField.getText().trim())
             );
             onlineUsersList.setModel(controller.getDlm());
         } catch (NumberFormatException e) {
@@ -200,11 +202,16 @@ public class ClientServer extends JFrame {
         }
     }
 
-    void onReceive(String message, int fromPort, String fromIp) {
+
+    @Override
+    public void onReceive(Message message) {
+        int fromPort = message.port();
+        String fromIp = message.address().getHostAddress();
+
         StyledDocument doc = textPaneArea.getStyledDocument();
         Style style = textPaneArea.addStyle("", null);
 
-        String[] msgMap = message.split(" ");
+        String[] msgMap = message.content().split(" ");
         float[] values;
         if (colorsMap.containsKey(msgMap[1])) {
             values = colorsMap.get(msgMap[1]);
@@ -218,7 +225,7 @@ public class ClientServer extends JFrame {
 
         StyleConstants.setForeground(style, new Color(values[0], values[1], values[2]));
         StyleConstants.setBackground(style, Color.white);
-        String s1 = message + "\n";
+        String s1 = message.content() + "\n";
         try {
             doc.insertString(doc.getLength(), s1, style);
         } catch (BadLocationException e) {

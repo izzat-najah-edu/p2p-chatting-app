@@ -15,8 +15,6 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -35,7 +33,6 @@ public class ClientServer extends JFrame
     private javax.swing.JTextPane textPaneArea;
     private javax.swing.JTextField usernameField;
     private javax.swing.JTextField passwordField;
-    private Map<String, float[]> colorsMap;
 
     private final ClientController controller;
 
@@ -211,19 +208,7 @@ public class ClientServer extends JFrame
         StyledDocument doc = textPaneArea.getStyledDocument();
         Style style = textPaneArea.addStyle("", null);
 
-        String[] msgMap = message.content().split(" ");
-        float[] values;
-        if (colorsMap.containsKey(msgMap[1])) {
-            values = colorsMap.get(msgMap[1]);
-        } else {
-            values = new float[]{1, 1, 1};
-            values[0] = (float) Math.random();
-            values[1] = (float) Math.random();
-            values[2] = (float) Math.random();
-            colorsMap.put(msgMap[1], values);
-        }
-
-        StyleConstants.setForeground(style, new Color(values[0], values[1], values[2]));
+        StyleConstants.setForeground(style, Color.GREEN);
         StyleConstants.setBackground(style, Color.white);
         String s1 = message.content() + "\n";
         try {
@@ -275,7 +260,6 @@ public class ClientServer extends JFrame
         statusField = new javax.swing.JTextField();
         javax.swing.JScrollPane jScrollPane4 = new javax.swing.JScrollPane();
         textPaneArea = new javax.swing.JTextPane();
-        colorsMap = new HashMap<>();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         addWindowListener(new java.awt.event.WindowAdapter() {

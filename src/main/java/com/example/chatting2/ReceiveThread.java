@@ -1,7 +1,7 @@
 package com.example.chatting2;
 
 public record ReceiveThread(
-        Client client
+        ClientController clientController
 ) implements Runnable {
 
     public void start() {
@@ -11,7 +11,7 @@ public record ReceiveThread(
     @Override
     public void run() {
         while (true) {
-            client.receive();
+            clientController.receive();
         }
     }
 }

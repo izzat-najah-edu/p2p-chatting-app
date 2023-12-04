@@ -267,7 +267,7 @@ public class Server extends JFrame {
             try {
 
                 StringBuilder s = new StringBuilder();
-                Client c = new Client();
+                ClientServer c = new ClientServer(new ClientController());
 
                 Set<String> k = clientsHash.keySet();
                 Iterator<String> itr = k.iterator();

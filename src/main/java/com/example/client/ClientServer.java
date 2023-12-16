@@ -116,10 +116,9 @@ public class ClientServer extends JFrame
                     startLine = 0;
                 }
 
-                doc.remove(startLine, endLine - startLine);
+                doc.remove(start, end - start + 1);
 
-            } catch (BadLocationException e) {
-                Logger.getLogger(ClientServer.class.getName()).log(Level.SEVERE, null, e);
+            } catch (BadLocationException ignored) {
             }
         }
     }

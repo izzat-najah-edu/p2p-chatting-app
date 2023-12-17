@@ -32,9 +32,10 @@ public class ClientController {
     private int remotePort;
     private BufferedReader inFromUser;
     private Socket clientSocket;
-    private DataOutputStream outToUser;
+    private PrintWriter outToUser;
 
     private final ArrayList<ReceiveListener> listeners = new ArrayList<>();
+    private int localPort;
 
     public ClientController() {
         username = "";
@@ -103,6 +104,20 @@ public class ClientController {
         established = false;
         sendToServer("logout");
         Alerter.showMessage("You logged out successfully");
+        try {
+            serverSocket.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void establish(int localPort) {
+        if (established) {
+            Alerter.showMessage("A connection is already established.");
+            return;
+        }
+        this.localPort = localPort;
+        new Thread(serverConnectionRunnable).start();
     }
 
     public void establish(String remoteIp, int remotePort) {
@@ -112,16 +127,15 @@ public class ClientController {
         }
         this.remoteIp = remoteIp;
         this.remotePort = remotePort;
-        new Thread(connectionRunnable).start();
+        new Thread(clientConnectionRunnable).start();
+    }
+
+    public boolean isEstablished() {
+        return established;
     }
 
     public void send(String message, int remotePort, String remoteIp) {
         try {
-            if (established) { // TCP
-                outToUser.writeUTF(message);
-                return;
-            }
-            // UDP
             byte[] sBuffer = message.getBytes();
             InetAddress remoteIpAddress = InetAddress.getByName(remoteIp);
             DatagramPacket sendPacket = new DatagramPacket(sBuffer, sBuffer.length, remoteIpAddress, remotePort);
@@ -129,6 +143,10 @@ public class ClientController {
         } catch (IOException e) {
             Alerter.showError("Could not send message!");
         }
+    }
+
+    public void send(String formattedMsg) {
+        outToUser.println(formattedMsg);
     }
 
     public void sendToServer(String message) {
@@ -189,33 +207,36 @@ public class ClientController {
     private final Runnable receiveMessagesFromUser = new Runnable() {
         @Override
         public void run() {
+            System.out.println("started");
             while (established) {
+                System.out.println("begin");
                 try {
                     String msg = inFromUser.readLine();
-                    var address = InetAddress.getByName(remoteIp);
-                    listeners.forEach(i -> i.onReceive(new Message(address, remotePort, msg)));
-                } catch (IOException ignored) {
+                    System.out.println("anything");
+                    listeners.forEach(i -> i.onReceive(new Message(null, remotePort, msg)));
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
                 }
             }
         }
     };
 
-    private final Runnable connectionRunnable = new Runnable() {
+    private final Runnable clientConnectionRunnable = new Runnable() {
         @Override
         public void run() {
             long startTime = System.currentTimeMillis();
             long elapsedTime = 0L;
 
-            while (elapsedTime < 1000) {
+            while (elapsedTime < 3000) {
                 try {
                     clientSocket = new Socket(remoteIp, remotePort);
-                    outToUser = new DataOutputStream(clientSocket.getOutputStream());
+                    outToUser = new PrintWriter(clientSocket.getOutputStream(), true);
                     inFromUser = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
                     Alerter.showMessage("Connection Established!");
                     established = true;
+                    new Thread(receiveMessagesFromUser).start();
                     break;
                 } catch (IOException e) {
-                    Alerter.showMessage("Trying to establish connection...");
                     try {
                         Thread.sleep(500);
                     } catch (InterruptedException ie) {
@@ -227,9 +248,53 @@ public class ClientController {
                 elapsedTime = System.currentTimeMillis() - startTime;
             }
 
-            if (elapsedTime >= 1000) {
+            if (elapsedTime >= 3000) {
                 // Alerter.showError("Could not establish connection in 5 seconds!");
                 established = false;
+            }
+        }
+    };
+
+    private final Runnable serverConnectionRunnable = new Runnable() {
+        @Override
+        public void run() {
+            long startTime = System.currentTimeMillis();
+            long elapsedTime = 0L;
+            ServerSocket serverSocket = null;
+
+            try {
+                serverSocket = new ServerSocket(localPort);
+                serverSocket.setSoTimeout(1000); // Set a timeout for accept()
+
+                while (elapsedTime < 3000) {
+                    try {
+                        clientSocket = serverSocket.accept(); // Wait for client connection
+                        outToUser = new PrintWriter(clientSocket.getOutputStream(), true);
+                        inFromUser = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+                        Alerter.showMessage("Connected!");
+                        established = true;
+                        new Thread(receiveMessagesFromUser).start();
+                        break;
+                    } catch (SocketTimeoutException ignored) {
+                    }
+
+                    elapsedTime = System.currentTimeMillis() - startTime;
+                }
+
+                if (elapsedTime >= 3000) {
+                    Alerter.showError("Could not connection!");
+                }
+
+            } catch (IOException e) {
+                Alerter.showError("Server error: " + e.getMessage());
+            } finally {
+                if (serverSocket != null && !serverSocket.isClosed()) {
+                    try {
+                        serverSocket.close();
+                    } catch (IOException e) {
+                        Alerter.showError("Error closing server socket: " + e.getMessage());
+                    }
+                }
             }
         }
     };

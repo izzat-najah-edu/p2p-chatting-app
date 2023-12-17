@@ -128,10 +128,12 @@ public class ClientServer extends JFrame
     }
 
     private void establishConnectionActionPerformed(java.awt.event.ActionEvent evt) {
-        if (!controller.isLoggedIn()) {
-            Alerter.showError("You can't connect, please Login first");
-        } else if (remoteIpField.getText().isEmpty() || remotePortField.getText().isEmpty()) {
-            Alerter.showError("You should select a user from the online user list");
+        if (remoteIpField.getText().isEmpty() || remotePortField.getText().isEmpty()) {
+            if (controller.isLoggedIn()) {
+                Alerter.showError("You can't connect, please Logout first");
+            } else {
+                controller.establish(Integer.parseInt(localPortField.getText()));
+            }
         } else try {
             var remoteIp = remoteIpField.getText();
             int remotePort = Integer.parseInt(remotePortField.getText());
@@ -143,7 +145,13 @@ public class ClientServer extends JFrame
 
     private void sendActionPerformed(java.awt.event.ActionEvent evt) {
         try {
-            if (!controller.isLoggedIn()) {
+            if (controller.isEstablished()) {
+                var msg = inArea.getText();
+                var username = controller.getUsername();
+                var formattedMsg = generateMessage(msg, username);
+                controller.send(formattedMsg);
+                inArea.setText("");
+            } else if (!controller.isLoggedIn()) {
                 Alerter.showError("You can't send, please Login first");
             } else if (remoteIpField.getText().isEmpty() || remotePortField.getText().isEmpty()) {
                 Alerter.showError("You should select a user from the online user list");
@@ -248,7 +256,9 @@ public class ClientServer extends JFrame
     @Override
     public void onReceive(Message message) {
         int fromPort = message.port();
-        String fromIp = message.address().getHostAddress();
+        String fromIp = "";
+        if (message.address() != null)
+            fromIp = message.address().getHostAddress();
 
         StyledDocument doc = textPaneArea.getStyledDocument();
         Style style = textPaneArea.addStyle("", null);
